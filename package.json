@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+        "gulp": "*",
+        "gulp-filter": "*",
+        "gulp-concat": "*",
+        "gulp-es6-module-transpiler": "*"
+  },
+  "devDependencies": {
+        "karma": "0.10",
+        "gulp-karma": "*",
+        "karma-qunit": "*",
+        "qunit-special-blend": "0.0.3",
+        "karma-phantomjs-launcher": "*",
+        "karma-qunit-special-blend": "*"
+  }
+}
