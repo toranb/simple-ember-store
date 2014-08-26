@@ -1,6 +1,12 @@
-A simple identity map for ember.js
+simple-ember-store
+==============================
 
-To use this in your project
+[![Build Status][]](https://travis-ci.org/toranb/simple-ember-store)
+
+This store includes a bare bones identity map for [Ember.js][]
+
+Installing
+----------
 
 1) pull down the store.js file from this repository
 2) include the script in your index.html or build tool
@@ -16,11 +22,27 @@ To use this in your project
         }
     });
 
-Want to run the tests for this store?
 
-npm install
-gulp test
+Running the unit tests
+----------
 
-Want to see a working ember app with this in the mix?
+    npm install
+    gulp test
+
+
+Example project
+----------
 
 https://github.com/toranb/ember-store-example
+
+
+License
+-------
+
+Copyright © 2014 Toran Billups http://toranbillups.com
+
+Licensed under the MIT License
+
+
+[Build Status]: https://secure.travis-ci.org/toranb/simple-ember-store.png?branch=master
+[Ember.js]: http://emberjs.com/
