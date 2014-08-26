@@ -49,6 +49,19 @@ var Store = Ember.Object.extend({
     },
     getEverything: function(type) {
         return arrayForType(type, this);
+    },
+    filterEverything: function(type, filter_attr, filter_value) {
+        var computed_string = 'source.@each.' + filter_attr;
+        return Em.ArrayProxy.extend({
+          source: undefined,
+          content: function () {
+            var filter_value = this.get('filter_value');
+            return this.get('source').filterBy(filter_attr, filter_value);
+          }.property(computed_string)
+        }).create({
+          filter_value: filter_value,
+          source: this.getEverything(type)
+        });
     }
 });
 

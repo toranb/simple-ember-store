@@ -1,17 +1,22 @@
 import Store from 'js/store';
 
-var store, Person;
+var store, Person, Cat;
 
 module('store push single tests', {
   setup: function() {
     Person = Ember.Object.extend({
         firstName: '',
-        lastName: ''
+        lastName: '',
+        cat_id: null
+    });
+    Cat = Ember.Object.extend({
+        color: ''
     });
     var container = new Ember.Container();
     this.container = container;
     container.register('store:main', Store);
     container.register('model:person', Person);
+    container.register('model:cat', Cat);
     store = container.lookup('store:main');
   }
 });
@@ -172,4 +177,96 @@ test("remove should destory the item by type", function() {
 
   var last_person = store.getById('person', last.id);
   ok(last_person, "The brandon record was not found");
+});
+
+test("filter everything should return array of models filtered by value", function() {
+  store.push('person', {
+    id: 9,
+    firstName: 'Jarrod',
+    lastName: 'Taylor',
+    cat_id: 1
+  });
+
+  store.push('person', {
+    id: 8,
+    firstName: 'Brandon',
+    lastName: 'Williams',
+    cat_id: 2
+  });
+
+  store.push('person', {
+    id: 7,
+    firstName: 'Toran',
+    lastName: 'Billups',
+    cat_id: 1
+  });
+
+  store.push('cat', {
+    id: 1,
+    color: 'red'
+  });
+
+  store.push('cat', {
+    id: 2,
+    color: 'blue'
+  });
+
+  equal(store.getEverything('person').length, 3);
+  equal(store.getEverything('person')[0].get('cat_id'), 1);
+  equal(store.getEverything('person')[1].get('cat_id'), 2);
+  equal(store.getEverything('person')[2].get('cat_id'), 1);
+
+  equal(store.filterEverything('person', 'cat_id', 1).get('length'), 2);
+  equal(store.filterEverything('person', 'cat_id', 2).get('length'), 1);
+
+  store.push('person', {
+      id: 14,
+      firstName: 'wat',
+      lastName: 'hat',
+      cat_id: 1
+  });
+  equal(store.filterEverything('person', 'cat_id', 1).get('length'), 3);
+  equal(store.filterEverything('person', 'cat_id', 2).get('length'), 1);
+
+  store.push('person', {
+      id: 15,
+      firstName: 'xor',
+      lastName: 'nope',
+      cat_id: 2
+  });
+  equal(store.filterEverything('person', 'cat_id', 2).get('length'), 2);
+  equal(store.filterEverything('person', 'cat_id', 1).get('length'), 3);
+
+  equal(store.getEverything('person').length, 5);
+});
+
+test("filter everything should return array of models that tracks changes without asking for an update", function() {
+  store.push('person', {
+    id: 9,
+    color: 'first',
+    cat_id: 1
+  });
+
+  store.push('person', {
+    id: 7,
+    color: 'last',
+    cat_id: 1
+  });
+
+  store.push('person', {
+    id: 1,
+    firstName: 'Toran',
+    lastName: 'Billups'
+  });
+
+  var firstBoundProperty = store.filterEverything('person', 'cat_id', 1);
+  equal(firstBoundProperty.get('length'), 2);
+
+  store.push('person', {
+      id: 14,
+      opened: 'wat',
+      cat_id: 1
+  });
+
+  equal(firstBoundProperty.get('length'), 3);
 });

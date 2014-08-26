@@ -13,7 +13,7 @@ var paths = {
         'vendor/ember-resolver.js',
         'store.js',
         'tests/unit_tests.js',
-        'tests/loader.js'
+        'vendor/test-loader.js'
     ]
 };
 
