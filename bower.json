@@ -1,16 +1,16 @@
 {
   "name": "simple-ember-store",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "homepage": "https://github.com/toranb/simple-ember-store",
   "authors": [
     "Toran Billups <toranb@gmail.com>"
   ],
-  "description": "A simple ember.js identity map",
+  "description": "a simple identity map for ember.js web apps",
   "main": "store.js",
-  "dependencies": {},
   "keywords": [
     "ember",
-    "store"
+    "data",
+    "identitymap"
   ],
   "license": "MIT",
   "ignore": [
