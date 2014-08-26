@@ -8,10 +8,10 @@ This store includes a bare bones identity map for [Ember.js][]
 Installing
 ----------
 
-1) pull down the store.js file from this repository
-2) include the script in your index.html or build tool
-3) import the store in your app.js using ES6
-4) register the store and inject it
+* pull down the store.js file from this repository
+* include the script in your index.html or build tool
+* import the store in your app.js using ES6
+* register the store and inject it
 
     App.initializer({
         name: "store",
