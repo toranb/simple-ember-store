@@ -243,20 +243,21 @@ test("filter everything should return array of models filtered by value", functi
 test("filter everything should return array of models that tracks changes without asking for an update", function() {
   store.push('person', {
     id: 9,
-    color: 'first',
+    firstName: 'Brandon',
+    lastName: 'Williams',
     cat_id: 1
   });
 
   store.push('person', {
-    id: 7,
-    color: 'last',
-    cat_id: 1
-  });
-
-  store.push('person', {
-    id: 1,
+    id: 8,
     firstName: 'Toran',
-    lastName: 'Billups'
+    lastName: 'Billups',
+    cat_id: 1
+  });
+
+  store.push('cat', {
+    id: 1,
+    color: 'red'
   });
 
   var firstBoundProperty = store.filterEverything('person', 'cat_id', 1);
@@ -264,7 +265,8 @@ test("filter everything should return array of models that tracks changes withou
 
   store.push('person', {
       id: 14,
-      opened: 'wat',
+      firstName: 'Another',
+      lastName: 'Person',
       cat_id: 1
   });
 
