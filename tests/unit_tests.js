@@ -304,3 +304,58 @@ test("filter everything works with string based values", function() {
   equal(foo_data.objectAt(1).get('firstName'), 'Toran');
   equal(bar_data.objectAt(0).get('firstName'), 'Brandon');
 });
+
+test("clear will destroy everything for a given type", function() {
+  store.push('person', {
+    id: 9,
+    firstName: 'Brandon',
+    lastName: 'Williams',
+    cat_id: 1
+  });
+
+  store.push('person', {
+    id: 8,
+    firstName: 'Toran',
+    lastName: 'Billups',
+    cat_id: 1
+  });
+
+  store.push('cat', {
+    id: 1,
+    color: 'red'
+  });
+
+  var catBefore = store.getById('cat', 1);
+  equal(catBefore.get('color'), 'red');
+
+  var catsBefore = store.getEverything('cat');
+  equal(catsBefore.get('length'), 1);
+
+  var firstBoundProperty = store.filterEverything('person', 'cat_id', 1);
+  equal(firstBoundProperty.get('length'), 2);
+
+  var individualFirstBefore = store.getById('person', 9);
+  equal(individualFirstBefore.get('firstName'), 'Brandon');
+
+  var individualLastAfter = store.getById('person', 8);
+  equal(individualLastAfter.get('firstName'), 'Toran');
+
+  store.clear('person');
+
+  equal(firstBoundProperty.get('length'), 0);
+
+  var all = store.getEverything('person');
+  equal(all.get('length'), 0);
+
+  var individualFirstAfter = store.getById('person', 9);
+  equal(individualFirstAfter, null);
+
+  var individualLastAfter = store.getById('person', 8);
+  equal(individualLastAfter, null);
+
+  var catAfter = store.getById('cat', 1);
+  equal(catAfter.get('color'), 'red');
+
+  var catsAfter = store.getEverything('cat');
+  equal(catsAfter.get('length'), 1);
+});

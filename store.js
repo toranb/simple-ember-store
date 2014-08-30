@@ -27,6 +27,10 @@ var Store = Ember.Object.extend({
         this.set('identityMap', {});
         this.set('array', {});
     },
+    clear: function(type) {
+        delete this.get('identityMap')[type]
+        arrayForType(type, this).clear();
+    },
     push: function(type, data) {
         var record = this.getById(type, data.id);
         if (record) {
