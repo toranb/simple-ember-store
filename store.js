@@ -40,8 +40,8 @@ var Store = Ember.Object.extend({
         }
         return record;
     },
-    remove: function(type, data) {
-        var record = this.getById(type, data.id);
+    remove: function(type, id) {
+        var record = this.getById(type, id);
         if (record) {
             delete this.get('identityMap')[type][record.id];
             arrayForType(type, this).removeObject(record);

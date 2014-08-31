@@ -169,7 +169,7 @@ test("remove should destory the item by type", function() {
   });
 
   equal(store.getEverything('person').length, 2);
-  store.remove('person', first);
+  store.remove('person', first.get('id'));
   equal(store.getEverything('person').length, 1);
 
   var first_person = store.getById('person', first.id);
