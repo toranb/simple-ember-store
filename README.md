@@ -9,9 +9,8 @@ Installing
 ----------
 
 1. bower install simple-ember-store
-2. include the script in your ES6 build tool of choice
-3. import the store in your app.js
-4. register the store and inject it
+2. include the script in your ES6 build
+3. register the store and inject it
 
 ```js
 App.initializer({
@@ -67,6 +66,69 @@ Example project
 https://github.com/toranb/ember-store-example
 
 
+A few more examples
+----------
+
+Below I'll show how you can use the store with a simple ember object to find/add/remove/update
+
+The example below relies heavily on this [PromiseMixin][]
+
+```js
+import PromiseMixin from 'js/mixins/promise';
+
+var Person = Ember.Object.extend({
+    firstName: '',
+    lastName: '',
+    phone: ''
+}).reopenClass(PromiseMixin, {
+    find: function(store) {
+        return this.xhr('/api/people/', 'GET').then(function(response) {
+            response.forEach(function(person) {
+                store.push('person', person);
+            });
+            return store.getEverything('person');
+        });
+    },
+    findById: function(store, id) {
+        return store.getById('person', id);
+    },
+    insert: function(store, person) {
+        var self = this;
+        var hash = {data: JSON.parse(JSON.stringify(person))};
+        return new Ember.RSVP.Promise(function(resolve,reject) {
+            return self.xhr("/api/people/", "POST", hash).then(function(persisted) {
+                var inserted = store.push('person', Person.create(persisted));
+                resolve(inserted);
+            }, function(err) {
+                reject(err);
+            });
+        });
+    },
+    update: function(person) {
+        var person_id = person.get("id");
+        var hash = {data: JSON.parse(JSON.stringify(person))};
+        var endpoint = "/api/people/%@/".fmt(person_id);
+        return this.xhr(endpoint, "PUT", hash);
+    },
+    remove: function(store, person) {
+        var self = this;
+        var person_id = person.get("id");
+        var endpoint = "/api/people/%@/".fmt(person_id);
+        return new Ember.RSVP.Promise(function(resolve,reject) {
+            return self.xhr(endpoint, "DELETE").then(function(arg) {
+                store.remove('person', person_id);
+                resolve(arg);
+            }, function(err) {
+                reject(err);
+            });
+        });
+    }
+});
+
+export default Person;
+```
+
+
 License
 -------
 
@@ -77,3 +139,4 @@ Licensed under the MIT License
 
 [Build Status]: https://secure.travis-ci.org/toranb/simple-ember-store.png?branch=master
 [Ember.js]: http://emberjs.com/
+[PromiseMixin]: https://gist.github.com/toranb/98abc9616f2abecde0d4
