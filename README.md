@@ -106,7 +106,7 @@ var Person = Ember.Object.extend({
     },
     update: function(person) {
         var person_id = person.get("id");
-        var hash = {data: JSON.parse(JSON.stringify(person))};
+        var hash = {data: JSON.stringify(person)};
         var endpoint = "/api/people/%@/".fmt(person_id);
         return this.xhr(endpoint, "PUT", hash);
     },
