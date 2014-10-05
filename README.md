@@ -94,7 +94,7 @@ var Person = Ember.Object.extend({
     },
     insert: function(store, person) {
         var self = this;
-        var hash = {data: JSON.parse(JSON.stringify(person))};
+        var hash = {data: JSON.stringify(person)};
         return new Ember.RSVP.Promise(function(resolve,reject) {
             return self.xhr("/api/people/", "POST", hash).then(function(persisted) {
                 var inserted = store.push('person', Person.create(persisted));
