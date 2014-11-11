@@ -6,6 +6,9 @@ function buildRecord(type, data, store) {
         set: function(key, value) {
             this._super('isDirty', true);
             return this._super(key, value);
+        },
+        save: function() {
+            this.set('isDirty', false);
         }
     });
     var record = recordObject.create(data);
