@@ -1,9 +1,15 @@
 function buildRecord(type, data, store) {
     var containerKey = 'model:' + type;
     var factory = store.container.lookupFactory(containerKey);
-    var record = factory.create(data);
-    var id = data.id;
-    identityMapForType(type, store)[id] = record;
+    var recordObject = factory.extend({
+        isDirty: false,
+        set: function(key, value) {
+            this._super('isDirty', true);
+            return this._super(key, value);
+        }
+    });
+    var record = recordObject.create(data);
+    identityMapForType(type, store)[data.id] = record;
     arrayForType(type, store).pushObject(record);
     return record;
 }

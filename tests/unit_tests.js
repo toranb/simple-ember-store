@@ -359,3 +359,29 @@ test("clear will destroy everything for a given type", function() {
   var catsAfter = store.getEverything('cat');
   equal(catsAfter.get('length'), 1);
 });
+
+test('isDirty property on class will check if object has been changed for known set property', function(){
+  var brandon = store.push('person', {
+    id: 9,
+    firstName: 'Brandon',
+    lastName: 'Williams',
+    foo: 'bar'
+  });
+  equal(false, brandon.get('isDirty'));
+
+  brandon.set('foo', 'baz');
+  equal(true, brandon.get('isDirty'));
+});
+
+test('isDirty property on class will check if object has been changed for unknown property', function(){
+  var brandon = store.push('person', {
+    id: 9,
+    firstName: 'Brandon',
+    lastName: 'Williams',
+    foo: 'bar'
+  });
+  equal(false, brandon.get('isDirty'));
+
+  brandon.set('wat', 'baz');
+  equal(true, brandon.get('isDirty'));
+});
