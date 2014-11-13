@@ -1,13 +1,19 @@
 import Store from 'js/store';
 
-var store, Person, Cat;
+var store, Person, Cat, superSave, superRevert;
 
 module('store push single tests', {
   setup: function() {
     Person = Ember.Object.extend({
         firstName: '',
         lastName: '',
-        cat_id: null
+        cat_id: null,
+        save: function() {
+            superSave = 'super';
+        },
+        revert: function() {
+            superRevert = 'revert';
+        }
     });
     Cat = Ember.Object.extend({
         color: ''
@@ -118,14 +124,14 @@ test("uses lookupFactory somewhere as part of a push", function() {
   equal(yipee, 'doodah', "lookupFactory gets called");
 });
 
-test("uses container's returned typeFactory create() for instantiation", function() {
+test("uses container's returned typeFactory extend() for instantiation", function() {
   var orig = this.container.lookupFactory('model:person'),
-      origCreate = orig.create,
+      origExtend = orig.extend,
       ping;
 
-  orig.create = function(opts) {
+  orig.extend = function(opts) {
     ping = 'pong';
-    return origCreate.apply(this, arguments);
+    return origExtend.apply(this, arguments);
   };
 
   store.push('person', {
@@ -134,7 +140,7 @@ test("uses container's returned typeFactory create() for instantiation", functio
     lastName: 'Billups'
   });
 
-  equal(ping, 'pong', "create on the lookupFactory gets called");
+  equal(ping, 'pong', "extend on the lookupFactory gets called");
 });
 
 test("return everything should return array of models", function() {
@@ -386,6 +392,31 @@ test('isDirty property on class will check if object has been changed for unknow
   equal(true, brandon.get('isDirty'));
 });
 
+test('isDirty property on class will check if object has been changed for unknown property', function(){
+  var brandon = store.push('person', {
+    id: 9,
+    firstName: 'Brandon',
+    lastName: 'Williams',
+    foo: 'bar'
+  });
+  equal(false, brandon.get('isDirty'));
+
+  brandon.set('foo', 'bar');
+  equal(false, brandon.get('isDirty'));
+});
+
+test('save method on object will call this._super()', function(){
+  var brandon = store.push('person', {
+    id: 9,
+    firstName: 'Brandon',
+    lastName: 'Williams',
+    foo: 'bar'
+  });
+
+  brandon.save();
+  equal(superSave, 'super', 'this._super() was not called on save');
+});
+
 test('save method on object will set dirty back to false', function(){
   var brandon = store.push('person', {
     id: 9,
@@ -400,4 +431,49 @@ test('save method on object will set dirty back to false', function(){
 
   brandon.save();
   equal(false, brandon.get('isDirty'));
+});
+
+test('revert method on object will call this._super()', function(){
+  var brandon = store.push('person', {
+    id: 9,
+    firstName: 'Brandon',
+    lastName: 'Williams',
+    foo: 'bar'
+  });
+
+  brandon.revert();
+  equal('revert', superRevert, 'this._super() was not called on revert');
+});
+
+test('revert method on object will set dirty back to false', function(){
+  var brandon = store.push('person', {
+    id: 9,
+    firstName: 'Brandon',
+    lastName: 'Williams',
+    foo: 'bar'
+  });
+  equal(false, brandon.get('isDirty'));
+
+  brandon.set('foo', 'baz');
+  equal(true, brandon.get('isDirty'));
+
+  brandon.revert();
+  equal(false, brandon.get('isDirty'));
+});
+
+test('revert method on object will set properties back to pre-dirty state', function(){
+  var brandon = store.push('person', {
+    id: 9,
+    firstName: 'Brandon',
+    lastName: 'Williams',
+    foo: 'bar'
+  });
+  equal(false, brandon.get('isDirty'));
+
+  brandon.set('foo', 'baz');
+  equal(true, brandon.get('isDirty'));
+
+  brandon.revert();
+  equal(false, brandon.get('isDirty'));
+  equal('bar', brandon.get('foo'));
 });

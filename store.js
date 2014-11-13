@@ -4,18 +4,25 @@ function buildRecord(type, data, store) {
     var recordObject = factory.extend({
         isDirty: false,
         set: function(key, value) {
-            this._super('isDirty', true);
+            if(this.get(key) !== value && !this.get('isDirty')) {
+                this._super('isDirty', true);
+            }
             return this._super(key, value);
         },
         save: function() {
             this.set('isDirty', false);
+            this._super();
+        },
+        revert: function() {
+            this.set('isDirty', false);
+            this._super();
         }
     });
     var record = recordObject.create(data);
     identityMapForType(type, store)[data.id] = record;
     arrayForType(type, store).pushObject(record);
     return record;
-}
+};
 
 function arrayForType(type, store) {
     var all = store.get('array');
