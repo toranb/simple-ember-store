@@ -1,3 +1,19 @@
+function clone(obj) {
+    var copy = {};
+    for(var key in obj){
+        if(obj.hasOwnProperty(key)) {
+            copy[key] = obj[key];
+        }
+    }
+    return copy;
+};
+
+function restore(obj, oldState) {
+    for(var key in oldState){
+        obj.set(key, oldState[key]);
+    }
+};
+
 function buildRecord(type, data, store) {
     var containerKey = 'model:' + type;
     var factory = store.container.lookupFactory(containerKey);
@@ -6,16 +22,23 @@ function buildRecord(type, data, store) {
         set: function(key, value) {
             if(this.get(key) !== value && !this.get('isDirty')) {
                 this._super('isDirty', true);
+                var oldState = clone(this);
+                this._super('_oldState', oldState);
             }
             return this._super(key, value);
         },
         save: function() {
-            this.set('isDirty', false);
+            this._clear();
             this._super();
         },
         revert: function() {
-            this.set('isDirty', false);
+            restore(this, this.get('_oldState'));
+            this._clear();
             this._super();
+        },
+        _clear: function() {
+            this.set('_oldState', {});
+            this.set('isDirty', false);
         }
     });
     var record = recordObject.create(data);

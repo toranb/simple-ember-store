@@ -392,19 +392,6 @@ test('isDirty property on class will check if object has been changed for unknow
   equal(true, brandon.get('isDirty'));
 });
 
-test('isDirty property on class will check if object has been changed for unknown property', function(){
-  var brandon = store.push('person', {
-    id: 9,
-    firstName: 'Brandon',
-    lastName: 'Williams',
-    foo: 'bar'
-  });
-  equal(false, brandon.get('isDirty'));
-
-  brandon.set('foo', 'bar');
-  equal(false, brandon.get('isDirty'));
-});
-
 test('save method on object will call this._super()', function(){
   var brandon = store.push('person', {
     id: 9,
@@ -417,7 +404,7 @@ test('save method on object will call this._super()', function(){
   equal(superSave, 'super', 'this._super() was not called on save');
 });
 
-test('save method on object will set dirty back to false', function(){
+test('save method on object will set dirty back to false and clear _oldState', function(){
   var brandon = store.push('person', {
     id: 9,
     firstName: 'Brandon',
@@ -431,6 +418,8 @@ test('save method on object will set dirty back to false', function(){
 
   brandon.save();
   equal(false, brandon.get('isDirty'));
+  var old = brandon.get('_oldState');
+  equal(0, Object.keys(old).length);
 });
 
 test('revert method on object will call this._super()', function(){
@@ -445,23 +434,7 @@ test('revert method on object will call this._super()', function(){
   equal('revert', superRevert, 'this._super() was not called on revert');
 });
 
-test('revert method on object will set dirty back to false', function(){
-  var brandon = store.push('person', {
-    id: 9,
-    firstName: 'Brandon',
-    lastName: 'Williams',
-    foo: 'bar'
-  });
-  equal(false, brandon.get('isDirty'));
-
-  brandon.set('foo', 'baz');
-  equal(true, brandon.get('isDirty'));
-
-  brandon.revert();
-  equal(false, brandon.get('isDirty'));
-});
-
-test('revert method on object will set properties back to pre-dirty state', function(){
+test('revert method on object will set properties back to pre-dirty state and clear _oldState', function(){
   var brandon = store.push('person', {
     id: 9,
     firstName: 'Brandon',
@@ -476,4 +449,50 @@ test('revert method on object will set properties back to pre-dirty state', func
   brandon.revert();
   equal(false, brandon.get('isDirty'));
   equal('bar', brandon.get('foo'));
+  var old = brandon.get('_oldState')
+  equal(0, Object.keys(old).length);
+});
+
+test('the _oldState will be the state of the object right before the object becomes dirty', function(){
+  var brandon = store.push('person', {
+    id: 9,
+    firstName: 'Brandon',
+    lastName: 'Williams',
+    foo: 'bar'
+  });
+  equal(false, brandon.get('isDirty'));
+
+  brandon.set('foo', 'baz');
+  equal(true, brandon.get('isDirty'));
+
+  brandon.set('foo', 'wat');
+  equal(true, brandon.get('isDirty'));
+
+  brandon.revert();
+  equal(false, brandon.get('isDirty'));
+  equal('bar', brandon.get('foo'));
+});
+
+test('reverting an object after it has been saved will be a no-op', function(){
+  var brandon = store.push('person', {
+    id: 9,
+    firstName: 'Brandon',
+    lastName: 'Williams',
+    foo: 'bar'
+  });
+  equal(false, brandon.get('isDirty'));
+
+  brandon.set('foo', 'baz');
+  equal(true, brandon.get('isDirty'));
+
+  brandon.set('foo', 'wat');
+  equal(true, brandon.get('isDirty'));
+
+  brandon.save()
+  equal(false, brandon.get('isDirty'));
+  equal('wat', brandon.get('foo'));
+
+  brandon.revert();
+  equal(false, brandon.get('isDirty'));
+  equal('wat', brandon.get('foo'));
 });
