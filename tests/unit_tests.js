@@ -463,6 +463,29 @@ test('the _oldState will be the state of the object right before the object beco
   equal(false, brandon.get('isDirty'));
 
   brandon.set('foo', 'baz');
+  equal('baz', brandon.get('foo'));
+  equal(true, brandon.get('isDirty'));
+
+  var old = brandon.get('_oldState');
+  equal(6, Object.keys(old).length);
+  equal('bar', old.foo);
+  equal('Brandon', old.firstName);
+  equal('Williams', old.lastName);
+  equal(9, old.id);
+  equal(true, old.isDirty);
+  equal(true, typeof(old.__nextSuper) === 'function');
+});
+
+test('the _oldState will be only set the first time a property is updated', function(){
+  var brandon = store.push('person', {
+    id: 9,
+    firstName: 'Brandon',
+    lastName: 'Williams',
+    foo: 'bar'
+  });
+  equal(false, brandon.get('isDirty'));
+
+  brandon.set('foo', 'baz');
   equal(true, brandon.get('isDirty'));
 
   brandon.set('foo', 'wat');
