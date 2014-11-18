@@ -5,6 +5,7 @@ simple-ember-store
 
 This store includes a bare bones identity map for [Ember.js][]
 
+
 Installing
 ----------
 
@@ -22,6 +23,7 @@ App.initializer({
   }
 });
 ```
+
 
 What about relationship support?
 ----------
@@ -48,9 +50,85 @@ var PeoplePersonRoute = Ember.Route.extend({
 This approach is not without it's tradeoffs (ie- additional http calls to fetch related data instead of using embedded json for example). I've personally found this is a great approach for apps that want to avoid the "kitchen-sink" problem.
 
 
-What about the missing MyObject.save() abstraction
+MyObject.get('isDirty') property
 ----------
-Because this is a simple identity map you won't get a rich model object to inherit from that offers up save/remove/update/find. You can think of this store as the primitive in which to build something like that if and when you need it.
+This is a property to be able to determine if the object has been changed. Here are the following scenarios for the `isDirty` property.
+
+1. This property will be `false` when an object is originally created and put into the store.
+2. When a property is updated, `isDirty` will be set to `true`. A copy of the object properties will be created and set as `_oldState`.
+3. When `isDirty` is `true` and the `save()` method is called, the `isDirty` will be set to `false` and the `_oldState` will be set to `{}`.
+4. When `isDirty` is `true` and the `revert()` method is called, the `isDirty` will be set to `false` and the `_oldState` will be used to set the object back to it's pre-dirty state. The `_oldState` will be set to `{}`.
+
+```js
+var PersonController = Ember.ObjectController.extend({
+  doSomething: function(person_id) {
+    var store = this.get("store");
+    var person = Person.findById(store, person_id);
+
+    person;                // {firstName: "firstName", lastName: "lastName", phone: "555-111-2222"}
+    person.get("isDirty"); // false
+
+    person.set("firstName", "Toran");
+    person.get("firstName"); // "Toran"
+    person.get("isDirty");   // true
+    person.get("_oldState"); // {firstName: "firstName", lastName: "lastName", phone: "555-111-2222"}
+  }
+});
+```
+
+
+MyObject.save() abstraction
+----------
+This is now a supported feature. This save function will simply set the `isDirty` property to `false` when called and will clear the `_oldState` of the object.
+
+```js
+var PersonController = Ember.ObjectController.extend({
+  doSomething: function(person_id) {
+    var store = this.get("store");
+    var person = Person.findById(store, person_id);
+
+    person;                // {firstName: "firstName", lastName: "lastName", phone: "555-111-2222"}
+    person.get("isDirty"); // false
+
+    person.set("firstName", "Toran");
+    person.get("firstName"); // "Toran"
+    person.get("isDirty");   // true
+    person.get("_oldState"); // {firstName: "firstName", lastName: "lastName", phone: "555-111-2222"}
+
+    person.save();
+    person.get("isDirty");   // false
+    person.get("firstName"); // "Toran"
+    person.get("_oldState"); // {}
+  }
+});
+```
+
+
+MyObject.revert() abstraction
+----------
+This revert function will set the `isDirty` property to `false` when called and will set the state of the object back to the `_oldState`.
+
+```js
+var PersonController = Ember.ObjectController.extend({
+  doSomething: function(person_id) {
+    var store = this.get("store");
+    var person = Person.findById(store, person_id);
+
+    person;                // {firstName: "firstName", lastName: "lastName", phone: "555-111-2222"}
+    person.get("isDirty"); // false
+
+    person.set("firstName", "Toran");
+    person.get("firstName"); // "Toran"
+    person.get("isDirty");   // true
+    person.get("_oldState"); // {firstName: "firstName", lastName: "lastName", phone: "555-111-2222"}
+
+    person.revert();
+    person.get("firstName"); // "firstName"
+    person.get("isDirty");   // false
+    person.get("_oldState"); // {}
+  }
+});
+```
 
 
 Running the unit tests
