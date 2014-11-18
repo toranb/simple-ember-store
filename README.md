@@ -99,14 +99,6 @@ var PersonController = Ember.ObjectController.extend({
     person.get("isDirty");   // false
     person.get("firstName"); // "Toran"
     person.get("_oldState"); // {}
-
-    person.get("isDirty"); // false
-    person.set("firstName", "Brandon");
-    person.get("isDirty"); // true
-
-    person.revert();
-    person.get("isDirty"); // false
-    person.set("firstName", "Toran");
   }
 });
 ```
