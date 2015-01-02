@@ -1,6 +1,9 @@
 function buildRecord(type, data, store) {
     var containerKey = 'model:' + type;
     var factory = store.container.lookupFactory(containerKey);
+
+    Ember.assert('No model was found for type: ' + type, factory);
+
     var record = factory.create(data);
     var id = data.id;
     identityMapForType(type, store)[id] = record;
@@ -32,7 +35,7 @@ var Store = Ember.Object.extend({
         arrayForType(type, this).clear();
     },
     push: function(type, data) {
-        var record = this.getById(type, data.id);
+        var record = this._getById(type, data.id);
         if (record) {
             record.setProperties(data);
         } else {
@@ -41,20 +44,35 @@ var Store = Ember.Object.extend({
         return record;
     },
     remove: function(type, id) {
-        var record = this.getById(type, id);
+        var record = this._getById(type, id);
         if (record) {
             delete this.get('identityMap')[type][record.id];
             arrayForType(type, this).removeObject(record);
         }
     },
-    getById: function(type, id) {
+    find: function(type, options) {
+        if (typeof options === 'undefined') {
+            return this._getEverything(type);
+        }
+        if (typeof options === 'object') {
+            var params = Object.keys(options);
+
+            Ember.assert('No key was found in the filter options', params.length);
+
+            var attr = params[0];
+            var value = options[attr];
+            return this._filterEverything(type, attr, value);
+        }
+        return this._getById(type, options);
+    },
+    _getById: function(type, id) {
         var identityMap = identityMapForType(type, this);
         return identityMap[id] || null;
     },
-    getEverything: function(type) {
+    _getEverything: function(type) {
         return arrayForType(type, this);
     },
-    filterEverything: function(type, filter_attr, filter_value) {
+    _filterEverything: function(type, filter_attr, filter_value) {
         var computed_string = 'source.@each.' + filter_attr;
         return Em.ArrayProxy.extend({
           source: undefined,
@@ -64,7 +82,7 @@ var Store = Ember.Object.extend({
           }.property(computed_string)
         }).create({
           filter_value: filter_value,
-          source: this.getEverything(type)
+          source: this._getEverything(type)
         });
     }
 });

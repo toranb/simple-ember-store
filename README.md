@@ -86,11 +86,11 @@ var Person = Ember.Object.extend({
             response.forEach(function(person) {
                 store.push('person', person);
             });
-            return store.getEverything('person');
+            return store.find('person');
         });
     },
     findById: function(store, id) {
-        return store.getById('person', id);
+        return store.find('person', id);
     },
     insert: function(store, person) {
         var self = this;

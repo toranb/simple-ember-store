@@ -28,7 +28,7 @@ test("records can be pushed into the store", function() {
     lastName: "Billups"
   });
 
-  var toranb = store.getById('person', 'toranb');
+  var toranb = store.find('person', 'toranb');
   ok(toranb, "The toranb record was found");
 
   equal(toranb.get('firstName'), "Toran", "the firstName property is correct");
@@ -43,7 +43,7 @@ test("push returns the created record", function() {
     lastName: "Billups"
   });
 
-  var gottenToranb = store.getById('person', 'toranb');
+  var gottenToranb = store.find('person', 'toranb');
 
   strictEqual(pushedToranb, gottenToranb, "both records are identical");
 });
@@ -55,7 +55,7 @@ test("pushing a record into the store twice updates the original record", functi
     lastName: "Billups"
   });
 
-  var toranb = store.getById('person', 'toranb');
+  var toranb = store.find('person', 'toranb');
   ok(toranb, "The toranb record was found");
 
   equal(toranb.get('firstName'), "Toran", "the firstName property is correct");
@@ -80,7 +80,7 @@ test("pushing doesn't mangle string ids", function() {
     lastName: 'Billups'
   });
 
-  var toranb = store.getById('person', 'toranb');
+  var toranb = store.find('person', 'toranb');
   strictEqual(toranb.get('id'), 'toranb');
 });
 
@@ -91,11 +91,11 @@ test("models with int based ids can be lookedup by either str or int values", fu
     lastName: 'Billups'
   });
 
-  var toranbByStr = store.getById('person', '123');
+  var toranbByStr = store.find('person', '123');
   strictEqual(toranbByStr.get('id'), 123);
   ok(toranbByStr instanceof Person);
 
-  var toranbByNum = store.getById('person', 123);
+  var toranbByNum = store.find('person', 123);
   strictEqual(toranbByNum.get('id'), 123);
   ok(toranbByNum instanceof Person);
 });
@@ -150,9 +150,9 @@ test("return everything should return array of models", function() {
     lastName: 'Williams'
   });
 
-  equal(store.getEverything('person').length, 2);
-  equal(store.getEverything('person')[0].get('firstName'), 'Toran');
-  equal(store.getEverything('person')[1].get('firstName'), 'Brandon');
+  equal(store.find('person').length, 2);
+  equal(store.find('person')[0].get('firstName'), 'Toran');
+  equal(store.find('person')[1].get('firstName'), 'Brandon');
 });
 
 test("remove should destory the item by type", function() {
@@ -168,14 +168,14 @@ test("remove should destory the item by type", function() {
     lastName: 'Williams'
   });
 
-  equal(store.getEverything('person').length, 2);
+  equal(store.find('person').length, 2);
   store.remove('person', first.get('id'));
-  equal(store.getEverything('person').length, 1);
+  equal(store.find('person').length, 1);
 
-  var first_person = store.getById('person', first.id);
+  var first_person = store.find('person', first.id);
   ok(!first_person, "The toran record was still found");
 
-  var last_person = store.getById('person', last.id);
+  var last_person = store.find('person', last.id);
   ok(last_person, "The brandon record was not found");
 });
 
@@ -211,13 +211,13 @@ test("filter everything should return array of models filtered by value", functi
     color: 'blue'
   });
 
-  equal(store.getEverything('person').length, 3);
-  equal(store.getEverything('person')[0].get('cat_id'), 1);
-  equal(store.getEverything('person')[1].get('cat_id'), 2);
-  equal(store.getEverything('person')[2].get('cat_id'), 1);
+  equal(store.find('person').length, 3);
+  equal(store.find('person')[0].get('cat_id'), 1);
+  equal(store.find('person')[1].get('cat_id'), 2);
+  equal(store.find('person')[2].get('cat_id'), 1);
 
-  equal(store.filterEverything('person', 'cat_id', 1).get('length'), 2);
-  equal(store.filterEverything('person', 'cat_id', 2).get('length'), 1);
+  equal(store.find('person', {cat_id: 1}).get('length'), 2);
+  equal(store.find('person', {cat_id: 2}).get('length'), 1);
 
   store.push('person', {
       id: 14,
@@ -225,8 +225,8 @@ test("filter everything should return array of models filtered by value", functi
       lastName: 'hat',
       cat_id: 1
   });
-  equal(store.filterEverything('person', 'cat_id', 1).get('length'), 3);
-  equal(store.filterEverything('person', 'cat_id', 2).get('length'), 1);
+  equal(store.find('person', {cat_id: 1}).get('length'), 3);
+  equal(store.find('person', {cat_id: 2}).get('length'), 1);
 
   store.push('person', {
       id: 15,
@@ -234,10 +234,10 @@ test("filter everything should return array of models filtered by value", functi
       lastName: 'nope',
       cat_id: 2
   });
-  equal(store.filterEverything('person', 'cat_id', 2).get('length'), 2);
-  equal(store.filterEverything('person', 'cat_id', 1).get('length'), 3);
+  equal(store.find('person', {cat_id: 2}).get('length'), 2);
+  equal(store.find('person', {cat_id: 1}).get('length'), 3);
 
-  equal(store.getEverything('person').length, 5);
+  equal(store.find('person').length, 5);
 });
 
 test("filter everything should return array of models that tracks changes without asking for an update", function() {
@@ -260,7 +260,7 @@ test("filter everything should return array of models that tracks changes withou
     color: 'red'
   });
 
-  var firstBoundProperty = store.filterEverything('person', 'cat_id', 1);
+  var firstBoundProperty = store.find('person', {cat_id: 1});
   equal(firstBoundProperty.get('length'), 2);
 
   store.push('person', {
@@ -295,8 +295,8 @@ test("filter everything works with string based values", function() {
     nickname: "foo"
   });
 
-  var foo_data = store.filterEverything('person', 'nickname', 'foo');
-  var bar_data = store.filterEverything('person', 'nickname', 'bar');
+  var foo_data = store.find('person', {nickname: 'foo'});
+  var bar_data = store.find('person', {nickname: 'bar'});
 
   equal(foo_data.get('length'), 2);
   equal(bar_data.get('length'), 1);
@@ -325,37 +325,55 @@ test("clear will destroy everything for a given type", function() {
     color: 'red'
   });
 
-  var catBefore = store.getById('cat', 1);
+  var catBefore = store.find('cat', 1);
   equal(catBefore.get('color'), 'red');
 
-  var catsBefore = store.getEverything('cat');
+  var catsBefore = store.find('cat');
   equal(catsBefore.get('length'), 1);
 
-  var firstBoundProperty = store.filterEverything('person', 'cat_id', 1);
+  var firstBoundProperty = store.find('person', {cat_id: 1});
   equal(firstBoundProperty.get('length'), 2);
 
-  var individualFirstBefore = store.getById('person', 9);
+  var individualFirstBefore = store.find('person', 9);
   equal(individualFirstBefore.get('firstName'), 'Brandon');
 
-  var individualLastAfter = store.getById('person', 8);
+  var individualLastAfter = store.find('person', 8);
   equal(individualLastAfter.get('firstName'), 'Toran');
 
   store.clear('person');
 
   equal(firstBoundProperty.get('length'), 0);
 
-  var all = store.getEverything('person');
+  var all = store.find('person');
   equal(all.get('length'), 0);
 
-  var individualFirstAfter = store.getById('person', 9);
+  var individualFirstAfter = store.find('person', 9);
   equal(individualFirstAfter, null);
 
-  var individualLastAfter = store.getById('person', 8);
+  var individualLastAfter = store.find('person', 8);
   equal(individualLastAfter, null);
 
-  var catAfter = store.getById('cat', 1);
+  var catAfter = store.find('cat', 1);
   equal(catAfter.get('color'), 'red');
 
-  var catsAfter = store.getEverything('cat');
+  var catsAfter = store.find('cat');
   equal(catsAfter.get('length'), 1);
+});
+
+test("filter everything should raise clear exception when invalid options are passed", function() {
+    try {
+        store.find('person', {});
+        ok(false, 'filter did not fail with clear exception message');
+    } catch(e) {
+        equal(e.message, 'Assertion Failed: No key was found in the filter options');
+    }
+});
+
+test("pushing a model that does not exist should raise clear exception", function() {
+    try {
+        store.push('goat', {id: 4, name: 'billy'});
+        ok(false, 'model lookup did not fail with clear exception message');
+    } catch(e) {
+        equal(e.message, 'Assertion Failed: No model was found for type: goat');
+    }
 });
